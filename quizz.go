@@ -12,6 +12,11 @@ import (
 	"strings"
 )
 
+
+type Score struct {
+	Points int
+}
+
 func main() {
     file, err := os.Create("problem.csv")
     if err != nil {
@@ -54,15 +59,33 @@ func readFile(csvFile string) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			answer := bufio.NewReader(os.Stdin)
-			fmt.Println("Question:", question[0])
-			text, _ := answer.ReadString('\n')
-			result := verifyAndCount(text, question[1])
-			println(result)
-		 //TODO Count player points after good question and move quizz logic to new function, also remove spaghetticode
+			quizz(question)
+
+		 //TODO Count player points after good question and remove spaghetticode
 		 }
 	 file.Close()
 	 }
+
+func quizz(question []string) int {
+	answer := bufio.NewReader(os.Stdin)
+	fmt.Println("Question:", question[0])
+	text, _ := answer.ReadString('\n')
+	result := verifyAndCount(text, question[1])
+	println(result)
+
+	//if result {
+	//	s := Score{0}
+	//	s.points()
+	//	println(s.Points)
+	//}
+	r := 0
+
+	return r
+}
+
+func (s *Score)  points()  {
+    s.Points += 1
+}
 
 func verifyAndCount(userAnswer string, trueAnswer string) bool {
      if strings.TrimRight(userAnswer, "\n") == trueAnswer {
