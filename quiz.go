@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -11,6 +12,36 @@ import (
 	"strconv"
 	"strings"
 )
+
+func userPreference() {
+
+}
+func createFile(csvFileName string, numberOfquestions int) string {
+	file, err := os.Create(csvFileName)
+	if err != nil {
+		log.Fatalln("Couldn't create the csv file", err)
+	}
+	defer file.Close()
+
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	for i := 0; i < numberOfquestions; i++ {
+		firstNumber, secondNumber, result := generateRandomAddition()
+		question := fmt.Sprintf("%d+%d", firstNumber, secondNumber)
+		answer := strconv.Itoa(result)
+		quizz_data := []string{question,answer}
+
+		returnError := writer.Write(quizz_data)
+		if returnError != nil {
+			fmt.Println(returnError)
+		}
+	}
+	writer.Flush()
+
+	return file.Name()
+}
 
 func generateRandomAddition() (int, int, int) {
 	min := 0
@@ -69,34 +100,22 @@ func verifyAndCount(userAnswer string, trueAnswer string) bool {
 }
 
 func main() {
-	file, err := os.Create("problem.csv", )
-	if err != nil {
-		log.Fatalln("Couldn't create the csv file", err)
-	}
-	defer file.Close()
+	var csvFileName string
+	var numberOfQuestions int
 
+	flag.StringVar(&csvFileName,"file-name", "problem.csv", "name a csv file")
+	flag.IntVar(&numberOfQuestions,"numb", 10, "define number of questions")
 
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
+	flag.Parse()
 
-	for i := 0; i < 5; i++ {
-		firstNumber, secondNumber, result := generateRandomAddition()
-		question := fmt.Sprintf("%d+%d", firstNumber, secondNumber)
-		answer := strconv.Itoa(result)
-		quizz_data := []string{question,answer}
+	fileName := createFile(csvFileName, numberOfQuestions)
 
-		returnError := writer.Write(quizz_data)
-		if returnError != nil {
-			fmt.Println(returnError)
-		}
-	}
-    writer.Flush()
-	questions := readFile(file.Name())
+	questions := readFile(fileName)
 
 	var points int
 
 	for _ , q := range questions {
 		points += quiz(q)
 	}
-    fmt.Println("You have", points, "points")
+    fmt.Println("You have", points, "points out of", numberOfQuestions)
 }
