@@ -52,16 +52,12 @@ func quiz(question []string) int {
 	fmt.Println("Question:", question[0])
 	text, _ := answer.ReadString('\n')
 	result := verifyAndCount(text, question[1])
-	println(result)
-
-	//TODO Count player points after good answer
-
-	var points int
 
 	if result {
-		points++
+		return 1
+	} else {
+		return 0
 	}
-	return points
 }
 
 func verifyAndCount(userAnswer string, trueAnswer string) bool {
@@ -102,5 +98,5 @@ func main() {
 	for _ , q := range questions {
 		points += quiz(q)
 	}
-    fmt.Println("You have", points, "points out of 10")
+    fmt.Println("You have", points, "points")
 }
