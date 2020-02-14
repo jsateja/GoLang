@@ -47,7 +47,7 @@ func readFile(csvFile string) [][]string {
 
 }
 
-func quizz(question []string) int {
+func quiz(question []string) int {
 	answer := bufio.NewReader(os.Stdin)
 	fmt.Println("Question:", question[0])
 	text, _ := answer.ReadString('\n')
@@ -100,7 +100,7 @@ func main() {
 	var points int
 
 	for _ , q := range questions {
-		points += quizz(q)
+		points += quiz(q)
 	}
     fmt.Println("You have", points, "points out of 10")
 }
