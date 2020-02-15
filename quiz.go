@@ -29,7 +29,7 @@ func createFile(csvFileName string, numberOfquestions int) string {
 
 	for i := 0; i < numberOfquestions; i++ {
 		firstNumber, secondNumber, result := generateRandomAddition()
-		question := fmt.Sprintf("%d+%d", firstNumber, secondNumber)
+		question := fmt.Sprintf("%d + %d", firstNumber, secondNumber)
 		answer := strconv.Itoa(result)
 		quizz_data := []string{question,answer}
 
@@ -81,8 +81,8 @@ func readFile(csvFile string) [][]string {
 func quiz(question []string) int {
 	answer := bufio.NewReader(os.Stdin)
 	fmt.Println("Question:", question[0])
-	text, _ := answer.ReadString('\n')
-	result := verifyAndCount(text, question[1])
+	userAnswer, _ := answer.ReadString('\n')
+	result := verifyAndCount(userAnswer, question[1])
 
 	if result {
 		return 1
@@ -108,6 +108,7 @@ func main() {
 
 	flag.Parse()
 
+
 	fileName := createFile(csvFileName, numberOfQuestions)
 
 	questions := readFile(fileName)
@@ -117,5 +118,6 @@ func main() {
 	for _ , q := range questions {
 		points += quiz(q)
 	}
-    fmt.Println("You have", points, "points out of", numberOfQuestions)
+	fmt.Println("You scored", points, "points out of", numberOfQuestions)
 }
+
