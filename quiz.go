@@ -11,6 +11,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func userPreference() {
@@ -102,9 +103,11 @@ func verifyAndCount(userAnswer string, trueAnswer string) bool {
 func main() {
 	var csvFileName string
 	var numberOfQuestions int
+	var quizTime int
 
-	flag.StringVar(&csvFileName,"file-name", "problem.csv", "name a csv file")
-	flag.IntVar(&numberOfQuestions,"numb", 10, "define number of questions")
+	flag.StringVar(&csvFileName,"file-name", "problem.csv", "name a csv file, default: problem.csv")
+	flag.IntVar(&numberOfQuestions,"numb", 10, "define number of questions, default: 10")
+	flag.IntVar(&quizTime, "time", 30, "define time (in seconds )of the quiz, default: 30s")
 
 	flag.Parse()
 
@@ -115,9 +118,33 @@ func main() {
 
 	var points int
 
+
+
 	for _ , q := range questions {
-		points += quiz(q)
+		timeout := make(chan bool, 1)
+
+		go func() {
+			points += quiz(q)
+			timeout <- false
+		}()
+
+		go func() {
+			time.Sleep(time.Duration(quizTime) *time.Second) //The problem is that both goroutines modify the same value so it's actually not good timer -> find better solution
+			timeout <- true
+		}()
+
+		select {
+		case t := <-timeout:
+			if t{
+			fmt.Println("Sorry, timed out!")
+			fmt.Println("You scored", points, "points out of", numberOfQuestions)
+			os.Exit(3)
+			} else {
+				//Do nothing
+			}
+		}
 	}
+
 	fmt.Println("You scored", points, "points out of", numberOfQuestions)
 }
 
