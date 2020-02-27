@@ -121,29 +121,23 @@ func main() {
 
 
 	for _ , q := range questions {
-		timeout := make(chan bool, 1)
+		gameFlow := make(chan bool, 1)
 
 		go func() {
 			points += quiz(q)
-			timeout <- false
-		}()
-
-		go func() {
-			time.Sleep(time.Duration(quizTime) *time.Second) //The problem is that both goroutines modify the same value so it's actually not good timer -> find better solution
-			timeout <- true
+			gameFlow <- false
 		}()
 
 		select {
-		case t := <-timeout:
-			if t{
+		case <- time.After(time.Duration(quizTime) *time.Second):
 			fmt.Println("Sorry, timed out!")
 			fmt.Println("You scored", points, "points out of", numberOfQuestions)
 			os.Exit(3)
-			} else {
-				//Do nothing
-			}
+		case <- gameFlow:
+			// Do nothing
 		}
 	}
+
 
 	fmt.Println("You scored", points, "points out of", numberOfQuestions)
 }
