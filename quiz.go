@@ -14,16 +14,12 @@ import (
 	"time"
 )
 
-func userPreference() {
-
-}
 func createFile(csvFileName string, numberOfquestions int) string {
 	file, err := os.Create(csvFileName)
 	if err != nil {
 		log.Fatalln("Couldn't create the csv file", err)
 	}
 	defer file.Close()
-
 
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
@@ -32,7 +28,7 @@ func createFile(csvFileName string, numberOfquestions int) string {
 		firstNumber, secondNumber, result := generateRandomAddition()
 		question := fmt.Sprintf("%d + %d", firstNumber, secondNumber)
 		answer := strconv.Itoa(result)
-		quizz_data := []string{question,answer}
+		quizz_data := []string{question, answer}
 
 		returnError := writer.Write(quizz_data)
 		if returnError != nil {
@@ -47,8 +43,8 @@ func createFile(csvFileName string, numberOfquestions int) string {
 func generateRandomAddition() (int, int, int) {
 	min := 0
 	max := 10
-	firstNumber := rand.Intn((max - min +1) + min)
-	secondNumber := rand.Intn((max - min +1) + min)
+	firstNumber := rand.Intn((max - min + 1) + min)
+	secondNumber := rand.Intn((max - min + 1) + min)
 	result := firstNumber + secondNumber
 	return firstNumber, secondNumber, result
 }
@@ -61,21 +57,21 @@ func readFile(csvFile string) [][]string {
 	}
 	defer file.Close()
 
-     reader := csv.NewReader(file)
+	reader := csv.NewReader(file)
 
-     questions := [][]string{}
+	questions := [][]string{}
 
-     for {
-     	question, err := reader.Read()
-     		if err == io.EOF {
-     			break
-			}
-			if err != nil {
-				log.Fatal(err)
-			}
-			questions = append(questions, question)
-     }
-	 return questions
+	for {
+		question, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		questions = append(questions, question)
+	}
+	return questions
 
 }
 
@@ -93,11 +89,11 @@ func quiz(question []string) int {
 }
 
 func verifyAndCount(userAnswer string, trueAnswer string) bool {
-     if strings.TrimRight(userAnswer, "\n") == trueAnswer {
-     	return true
-	 } else {
-	 	return false
-	 }
+	if strings.TrimRight(userAnswer, "\n") == trueAnswer {
+		return true
+	} else {
+		return false
+	}
 }
 
 func main() {
@@ -105,12 +101,11 @@ func main() {
 	var numberOfQuestions int
 	var quizTime int
 
-	flag.StringVar(&csvFileName,"file-name", "problem.csv", "name a csv file, default: problem.csv")
-	flag.IntVar(&numberOfQuestions,"numb", 10, "define number of questions, default: 10")
+	flag.StringVar(&csvFileName, "file-name", "problem.csv", "name a csv file, default: problem.csv")
+	flag.IntVar(&numberOfQuestions, "numb", 10, "define number of questions, default: 10")
 	flag.IntVar(&quizTime, "time", 30, "define time (in seconds )of the quiz, default: 30s")
 
 	flag.Parse()
-
 
 	fileName := createFile(csvFileName, numberOfQuestions)
 
@@ -118,27 +113,18 @@ func main() {
 
 	var points int
 
-
-
-	for _ , q := range questions {
-		gameFlow := make(chan bool, 1)
-
-		go func() {
-			points += quiz(q)
-			gameFlow <- false
-		}()
-
+	timer := time.NewTimer(time.Duration(quizTime) * time.Second)
+	for _, q := range questions {
 		select {
-		case <- time.After(time.Duration(quizTime) *time.Second):
+		case <-timer.C:
 			fmt.Println("Sorry, timed out!")
 			fmt.Println("You scored", points, "points out of", numberOfQuestions)
-			os.Exit(3)
-		case <- gameFlow:
-			// Do nothing
+			return
+
+		default:
+			points += quiz(q)
 		}
 	}
 
-
 	fmt.Println("You scored", points, "points out of", numberOfQuestions)
 }
-
