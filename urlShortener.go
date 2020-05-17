@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"urlshort"
+	"urlshort" // of course this package should be imported via url
 )
 
 func main() {

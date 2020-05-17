@@ -14,6 +14,7 @@ import (
 	"time"
 )
 
+// It creates csv file with simple questions
 func createFile(csvFileName string, numberOfquestions int) string {
 	file, err := os.Create(csvFileName)
 	if err != nil {
@@ -40,6 +41,7 @@ func createFile(csvFileName string, numberOfquestions int) string {
 	return file.Name()
 }
 
+// Generates questions: simple addition
 func generateRandomAddition() (int, int, int) {
 	min := 0
 	max := 10
@@ -49,7 +51,7 @@ func generateRandomAddition() (int, int, int) {
 	return firstNumber, secondNumber, result
 }
 
-//think about using bufio as a reader
+//Reads the csv file with questions
 func readFile(csvFile string) [][]string {
 	file, err := os.OpenFile(csvFile, os.O_RDWR, 0666)
 	if err != nil {
@@ -75,6 +77,7 @@ func readFile(csvFile string) [][]string {
 
 }
 
+// Start quiz game, read the player answer from the keyboard
 func quiz(question []string) int {
 	answer := bufio.NewReader(os.Stdin)
 	fmt.Println("Question:", question[0])
@@ -88,6 +91,7 @@ func quiz(question []string) int {
 	}
 }
 
+// Verify the answer provided by the player
 func verifyAndCount(userAnswer string, trueAnswer string) bool {
 	if strings.TrimRight(userAnswer, "\n") == trueAnswer {
 		return true
