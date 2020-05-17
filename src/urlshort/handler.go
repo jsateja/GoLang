@@ -1,13 +1,21 @@
 package urlshort
 
 import (
-	"fmt"
+	"errors"
 	"gopkg.in/yaml.v2"
+	"log"
+	"net/http"
 )
 
-func MapHandler(pathsToUrls map[string]string) int {
-
-	return 0
+func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		if dest, ok := pathsToUrls[path]; ok {
+			http.Redirect(w, r, dest, http.StatusFound)
+			return
+		}
+		fallback.ServeHTTP(w, r)
+	}
 }
 
 func parseYAML(yamlData []byte) ([]map[string]string, error) {
@@ -20,25 +28,28 @@ func parseYAML(yamlData []byte) ([]map[string]string, error) {
 	return m, nil
 }
 
-func buildMap(parsedYaml []map[string]string) map[string]string {
-	fmt.Println(parsedYaml)
+func buildMap(parsedYaml []map[string]string) (map[string]string, error) {
+	if parsedYaml == nil {
+		err := errors.New("Parsed YAML is empty")
+		return nil, err
+	}
 	properMap := make(map[string]string)
 	for _, paths := range parsedYaml {
-		fmt.Println(paths)
-		for k, v := range paths {
-			properMap[k] = v
-		}
+		properMap[paths["path"]] = paths["url"]
 	}
-	fmt.Println(properMap)
 
-	return properMap
+	return properMap, nil
 }
 
-func YAMLHandler(yaml []byte) (int, error) {
+func YAMLHandler(yaml []byte, fallback http.Handler) (http.HandlerFunc, error) {
 	parsedYaml, err := parseYAML(yaml)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	pathMap := buildMap(parsedYaml)
-	return MapHandler(pathMap), nil
+	pathMap, err := buildMap(parsedYaml)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return MapHandler(pathMap, fallback), nil
 }
